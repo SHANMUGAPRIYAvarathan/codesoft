@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Maker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div id="quiz-creator">
+        <h1>Create Your Quiz</h1>
+        <form id="quiz-form">
+            <label for="question">Question:</label>
+            <input type="text" id="question" name="question" required><br><br>
+
+            <label for="answer1">Answer 1:</label>
+            <input type="text" id="answer1" name="answer1" required><br><br>
+
+            <label for="answer2">Answer 2:</label>
+            <input type="text" id="answer2" name="answer2" required><br><br>
+
+            <label for="answer3">Answer 3:</label>
+            <input type="text" id="answer3" name="answer3" required><br><br>
+
+            <label for="answer4">Answer 4:</label>
+            <input type="text" id="answer4" name="answer4" required><br><br>
+
+            <label for="correct-answer">Correct Answer (1-4):</label>
+            <input type="number" id="correct-answer" name="correct-answer" min="1" max="4" required><br><br>
+
+            <button type="submit">Add Question</button>
+        </form>
+
+        <h2>Your Quiz:</h2>
+        <div id="quiz-preview"></div>
+    </div>
+
+    <div id="quiz-taker" style="display: none;">
+        <h1>Take the Quiz</h1>
+        <div id="quiz-container"></div>
+        <button id="submit-quiz">Submit Quiz</button>
+        <div id="result"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+h1 {
+    text-align: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form label {
+    margin-top: 10px;
+}
+
+form input {
+    padding: 8px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+form button {
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #45a049;
+}
+
+#quiz-taker {
+    max-width: 600px;
+    margin: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#quiz-preview {
+    margin-top: 20px;
+}
+
+#quiz-container {
+    margin-top: 20px;
+}
+
+#result {
+    margin-top: 20px;
+    font-weight: bold;
+    color: #333;
+}
+let quizData = [];
+let currentQuestionIndex = 0;
+
+// Handle form submission for adding questions to the quiz
+document.getElementById('quiz-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const question = document.getElementById('question').value;
+    const answer1 = document.getElementById('answer1').value;
+    const answer2 = document.getElementById('answer2').value;
+    const answer3 = document.getElementById('answer3').value;
+    const answer4 = document.getElementById('answer4').value;
+    const correctAnswer = parseInt(document.getElementById('correct-answer').value);
+
+    const newQuestion = {
+        question,
+        answers: [answer1, answer2, answer3, answer4],
+        correctAnswer
+    };
+
+    quizData.push(newQuestion);
+
+    // Clear form fields
+    document.getElementById('quiz-form').reset();
+
+    displayQuizPreview();
+});
+
+// Display all added questions in a preview
+function displayQuizPreview() {
+    const previewContainer = document.getElementById('quiz-preview');
+    previewContainer.innerHTML = '';
+    
+    quizData.forEach((item, index) => {
+        previewContainer.innerHTML += `
+            <div>
+                <strong>Question ${index + 1}:</strong> ${item.question}
+                <br>
+                A: ${item.answers[0]}
+                <br>
+                B: ${item.answers[1]}
+                <br>
+                C: ${item.answers[2]}
+                <br>
+                D: ${item.answers[3]}
+                <br>
+                Correct Answer: ${item.correctAnswer}
+                <hr>
+            </div>
+        `;
+    });
+}
+
+// Show quiz to be taken
+function startQuiz() {
+    document.getElementById('quiz-creator').style.display = 'none';
+    document.getElementById('quiz-taker').style.display = 'block';
+
+    const quizContainer = document.getElementById('quiz-container');
+    quizContainer.innerHTML = '';
+
+    quizData.forEach((item, index) => {
+        quizContainer.innerHTML += `
+            <div class="question">
+                <p>${item.question}</p>
+                <input type="radio" name="question${index}" value="1"> ${item.answers[0]}<br>
+                <input type="radio" name="question${index}" value="2"> ${item.answers[1]}<br>
+                <input type="radio" name="question${index}" value="3"> ${item.answers[2]}<br>
+                <input type="radio" name="question${index}" value="4"> ${item.answers[3]}<br>
+            </div>
+        `;
+    });
+}
+
+// Handle quiz submission
+document.getElementById('submit-quiz').addEventListener('click', function () {
+    let score = 0;
+    quizData.forEach((item, index) => {
+        const userAnswer = document.querySelector(`input[name="question${index}"]:checked`);
+        if (userAnswer && parseInt(userAnswer.value) === item.correctAnswer) {
+            score++;
+        }
+    });
+
+    const result = document.getElementById('result');
+    result.innerHTML = `You scored ${score} out of ${quizData.length}.`;
+});
+
+// Start quiz button (you can add this button inside the creator or somewhere else)
+const startQuizButton = document.createElement('button');
+startQuizButton.innerHTML = 'Start Quiz';
+startQuizButton.onclick = startQuiz;
+document.getElementById('quiz-creator').appendChild(startQuizButton);
